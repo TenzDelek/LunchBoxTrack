@@ -2,11 +2,12 @@ import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 import React from "react";
 import { GoArrowUpRight } from "react-icons/go";
 import { currentUser } from "@clerk/nextjs/server";
+import Link from "next/link";
 const Navbar = async () => {
   const user = await currentUser();
   return (
     <div className=" py-5 px-10  bg-[#EBEBEB] mt-5 mx-10 text-black flex items-center justify-between  rounded-full">
-      <div className=" font-bold">LunchBox</div>
+     <Link href="/"> <div className=" font-bold">LunchBox</div></Link>
       <div>
         <SignedOut>
           <div className=" group space-x-3 flex items-center bg-[#FEED01] border border-black text-black font-bold py-2 px-4 rounded-full text-sm">
