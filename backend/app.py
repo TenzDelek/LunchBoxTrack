@@ -7,7 +7,7 @@ load_dotenv()
 import os
 
 app = Flask(__name__)
-CORS(app)
+CORS(app,origins=["https://lunch-box-track.vercel.app"])
 
 mongo_uri = os.environ.get('MONGODB_URI')
 client = MongoClient(mongo_uri)
