@@ -2,6 +2,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
 from bson import ObjectId
+from dotenv import load_dotenv
+load_dotenv()
 import os
 
 app = Flask(__name__)
@@ -89,5 +91,15 @@ def checkout():
         return jsonify({"message": "Order placed successfully"}), 200
     return jsonify({"message": "Cart is empty"}), 400
 
+@app.route('/get-past-orders', methods=['GET'])
+def get_past_orders():
+    user_id = request.args.get('userId')
+    past_orders = list(orders_collection.find({'userId': user_id}))
+    
+    # Convert ObjectId to string for JSON serialization
+    for order in past_orders:
+        order['_id'] = str(order['_id'])
+    
+    return jsonify(past_orders), 200
 if __name__ == '__main__':
     app.run(debug=True)

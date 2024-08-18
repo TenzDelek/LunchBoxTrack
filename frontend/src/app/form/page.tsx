@@ -27,10 +27,11 @@ export default function Forms() {
   });
   const [cart, setCart] = useState<CartItem[]>([]);
   const [errors, setErrors] = useState<Partial<Order>>({});
-
+  const [pastOrders, setPastOrders] = useState<any[]>([]);
   useEffect(() => {
     if (user) {
       fetchCart();
+      fetchPastOrders();
     }
   }, [user]);
 
@@ -42,7 +43,14 @@ export default function Forms() {
       console.error("Error fetching cart:", error);
     }
   };
-
+  const fetchPastOrders = async () => {
+    try {
+      const response = await api.get(`/get-past-orders?userId=${user?.id}`);
+      setPastOrders(response.data);
+    } catch (error) {
+      console.error("Error fetching past orders:", error);
+    }
+  };
   const validateForm = (): boolean => {
     try {
       orderSchema.parse(order);
@@ -92,20 +100,21 @@ export default function Forms() {
     try {
       await api.post("/checkout", { userId: user?.id });
       alert("Order placed successfully!");
-      setCart([]); // Clear the cart state
+      setCart([]);
+      fetchPastOrders(); // Refresh past orders after checkout
     } catch (error) {
       console.error("Error placing order:", error);
       alert("Error placing order");
     }
   };
-
   return (
     <div className="items-center justify-center h-screen bg-[#EBEBEB] rounded-lg text-black w-full my-6 flex">
       <div className="flex-1 p-2 border-r border-black h-full items-center w-full justify-center">
+    
+        
+        <div className="h-1/2  overflow-scroll rounded-md">
         <h2 className=" text-sm font-bold">Your LunchBox
         </h2>
-        
-        <div className=" mt-2 h-1/2  overflow-scroll rounded-md">
           {cart.length > 0 ? (
             <>
               <ul className=" space-y-2">
@@ -147,7 +156,23 @@ export default function Forms() {
             <p>Your cart is empty.</p>
           )}
         </div>
-        <div className=" h-1/2">past</div>
+        <div className=" h-56 overflow-scroll rounded-md">
+  <h2 className="text-sm font-bold mb-2 ">Past Orders</h2>
+  {pastOrders.map((order, index) => (
+    <div key={order._id} className="bg-white rounded-md p-4 mb-2 shadow-sm">
+      <p className="font-semibold text-sm mb-2">Order #{index + 1}</p>
+      <ul className="space-y-1">
+        {order.items.map((item: CartItem, itemIndex: number) => (
+          <li key={itemIndex} className="text-sm flex justify-between">
+            <span>{item.dishName}</span>
+            <span>x{item.quantity}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-gray-500 mt-2">Status: {order.status}</p>
+    </div>
+  ))}
+</div>
       </div>
       <div className="flex-1 h-full p-2">
         <h1 className="pl-4 flex text-sm items-center gap-2 mb-10">
