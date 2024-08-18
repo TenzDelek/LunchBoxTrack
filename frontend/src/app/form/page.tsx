@@ -12,8 +12,13 @@ const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000/",
 });
 
-type Order = z.infer<typeof orderSchema>;
-
+type Order = {
+  dishName: string;
+  quantity: number;
+};
+type OrderErrors = {
+  [K in keyof Order]?: string;
+};
 type CartItem = {
   dishName: string;
   quantity: number;
@@ -26,7 +31,7 @@ export default function Forms() {
     quantity: 1,
   });
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [errors, setErrors] = useState<Partial<Order>>({});
+  const [errors, setErrors] = useState<OrderErrors>({});
   const [pastOrders, setPastOrders] = useState<any[]>([]);
   useEffect(() => {
     if (user) {
@@ -58,9 +63,11 @@ export default function Forms() {
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const newErrors: Partial<Order> = {};
+        const newErrors: OrderErrors = {};
         error.errors.forEach((err) => {
-          newErrors[err.path[0] as keyof Order] = err.message;
+          if (err.path[0] in order) {
+            newErrors[err.path[0] as keyof Order] = err.message;
+          }
         });
         setErrors(newErrors);
       }
